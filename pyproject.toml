@@ -1,0 +1,63 @@
+[project]
+name            = "two-percent-detector"
+version         = "2.0.0"
+description     = "2% Detector — multi-platform chat monitor (Twitch, Kick, Rumble) that alerts on repeated messages"
+license         = "MIT"
+requires-python = ">=3.14"
+dependencies    = ["rich>=14.3.3", "niquests[ws]>=3.18.2"]
+
+[build-system]
+requires      = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["two_percent_detector"]
+
+[project.scripts]
+monitor = "two_percent_detector.monitor:main"
+
+[dependency-groups]
+dev = ["basedpyright>=1.38.4", "ruff>=0.15.8"]
+
+# Ruff 
+[tool.ruff]
+target-version = "py314"
+preview        = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    # Docstring style: D211+D212 is the Google convention.
+    "D203", # one-blank-line-before-class  (conflicts with D211)
+    "D213", # multi-line-summary-second-line (conflicts with D212)
+
+    # Formatter owns these; enabling them causes double-fix conflicts.
+    "COM812", # missing-trailing-comma
+    "ISC001", # single-line-implicit-string-concatenation
+
+    # asyncio.create_task without storing a reference is intentional for
+    # long-lived background loops that must survive until the bot shuts down.
+    "RUF006", # asyncio-dangling-task
+
+    # Copyright headers are not used; the project is MIT-licensed.
+    "CPY001", # missing-copyright-notice
+
+    # Deferred imports inside functions are intentional to avoid circular
+    # imports or defer expensive module loading at startup.
+    "PLC0415", # import-outside-top-level
+
+    # KickChat.clean_text and RumbleChat.clean_text must be instance methods
+    # to satisfy the PlatformClient Protocol, even though they don't use self.
+    "PLR6301", # no-self-use
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+known-third-party = ["rich", "niquests"]
+
+# Basedpyright 
+[tool.basedpyright]
+pythonVersion    = "3.14"
+typeCheckingMode = "strict"
