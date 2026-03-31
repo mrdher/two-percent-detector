@@ -26,10 +26,15 @@ from typing import TYPE_CHECKING, Final, cast
 
 from niquests import AsyncSession, ReadTimeout, Session
 
-from .chat_types import KICK, RECONNECT_DELAY, ChatMessage, check_recent_ban
-from .emotes import EmoteCache, strip_kick_emotes
-from .ui import console
-from .user_agent import chrome_user_agent
+from two_percent_detector.core.chat_types import (
+    KICK,
+    RECONNECT_DELAY,
+    ChatMessage,
+    check_recent_ban,
+)
+from two_percent_detector.ui.terminal import console
+from two_percent_detector.utils.emotes import EmoteCache, strip_kick_emotes
+from two_percent_detector.utils.user_agent import chrome_user_agent
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -40,11 +45,12 @@ if TYPE_CHECKING:
         AsyncWebSocketExtensionFromHTTP,
     )
 
-    from .chat_types import JsonObj, JsonValue
+    from two_percent_detector.core.chat_types import JsonObj, JsonValue
 
 logger: Logger = logging.getLogger(name=__name__)
 
 # Pusher WebSocket endpoint template.
+# Public value used by Kick for all users, not secret
 _PUSHER_KEY: Final[str] = "32cbd69e4b950bf97679"
 _PUSHER_URL: Final[str] = (
     "wss://ws-us2.pusher.com/app/{key}?protocol=7&client=js&version=8.4.0&flash=false"

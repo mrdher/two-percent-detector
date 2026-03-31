@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
     from niquests.models import Response
 
-    from .chat_types import JsonValue
+    from two_percent_detector.core.chat_types import JsonValue
 
 logger: Logger = logging.getLogger(name=__name__)
 

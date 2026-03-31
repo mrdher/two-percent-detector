@@ -15,17 +15,21 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
-from .chat_types import (
+from two_percent_detector.core.chat_types import (
     PLATFORM_COLOUR,
     PLATFORM_LABEL,
     ClearChatEvent,
 )
-from .detector import REPEAT_COUNT, SIMILARITY_THRESHOLD, WINDOW_SECONDS
-from .discord import AlertContext, send_alert
+from two_percent_detector.core.detector import (
+    REPEAT_COUNT,
+    SIMILARITY_THRESHOLD,
+    WINDOW_SECONDS,
+)
+from two_percent_detector.integrations.discord import AlertContext, send_alert
 
 if TYPE_CHECKING:
-    from .chat_types import ChatMessage, Platform
-    from .stats import ChatStats
+    from two_percent_detector.core.chat_types import ChatMessage, Platform
+    from two_percent_detector.core.stats import ChatStats
 
 # Shared console instance.
 console = Console(highlight=False)

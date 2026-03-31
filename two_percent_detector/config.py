@@ -27,6 +27,8 @@ DEFAULT_RUMBLE_CHANNEL: Final[str] = "Asmongold"
 # Known bots — well-known bot usernames (lowercase) to always ignore
 KNOWN_BOTS: Final[frozenset[str]] = frozenset[str](
     json.loads(
-        s=(Path(__file__).parent / "known_bots.json").read_text(encoding="utf-8")
+        s=(Path(__file__).parent / "data" / "known_bots.json").read_text(
+            encoding="utf-8",
+        )
     ),
 )

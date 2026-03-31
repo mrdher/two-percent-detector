@@ -54,7 +54,9 @@ _SYLLABLE_REPEAT_PATTERN: Final[re.Pattern[str]] = re.compile(r"(.{1,3})\1{2,}")
 # Common filler words that should not trigger spam alerts on their own.
 _COMMON_WORDS: Final[frozenset[str]] = frozenset[str](
     json.loads(
-        s=(Path(__file__).parent / "common_words.json").read_text(encoding="utf-8")
+        s=(Path(__file__).parents[1] / "data" / "common_words.json").read_text(
+            encoding="utf-8",
+        )
     ),
 )
 

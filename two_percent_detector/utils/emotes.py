@@ -44,7 +44,7 @@ from typing import TYPE_CHECKING, Final, cast
 
 from niquests import AsyncSession, RequestException
 
-from .chat_types import HTTP_NOT_FOUND, TWITCH
+from two_percent_detector.core.chat_types import HTTP_NOT_FOUND, TWITCH
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -54,7 +54,7 @@ if TYPE_CHECKING:
 
     from niquests.models import AsyncResponse, Response
 
-    from .chat_types import JsonValue, Platform
+    from two_percent_detector.core.chat_types import JsonValue, Platform
 
 logger: Logger = logging.getLogger(name=__name__)
 

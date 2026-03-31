@@ -15,14 +15,14 @@ from typing import TYPE_CHECKING, Final, TypedDict
 
 from niquests import AsyncSession
 
-from .chat_types import KICK, PLATFORM_LABEL, RUMBLE, TWITCH
+from two_percent_detector.core.chat_types import KICK, PLATFORM_LABEL, RUMBLE, TWITCH
 
 if TYPE_CHECKING:
     from logging import Logger
 
     from niquests.models import Response
 
-    from .chat_types import Platform
+    from two_percent_detector.core.chat_types import Platform
 
 
 class _EmbedField(TypedDict):

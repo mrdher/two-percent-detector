@@ -26,16 +26,16 @@ from typing import TYPE_CHECKING, Final
 
 from niquests import Session
 
-from .chat_types import (
+from two_percent_detector.core.chat_types import (
     HTTP_NOT_FOUND,
     RECONNECT_DELAY,
     RUMBLE,
     ChatMessage,
     check_recent_ban,
 )
-from .emotes import strip_rumble_emotes
-from .ui import console
-from .user_agent import chrome_user_agent
+from two_percent_detector.ui.terminal import console
+from two_percent_detector.utils.emotes import strip_rumble_emotes
+from two_percent_detector.utils.user_agent import chrome_user_agent
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 
     from niquests.models import Response
 
-    from .chat_types import JsonObj, JsonValue
+    from two_percent_detector.core.chat_types import JsonObj, JsonValue
 
 logger: Logger = logging.getLogger(name=__name__)
 

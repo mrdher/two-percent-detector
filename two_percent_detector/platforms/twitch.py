@@ -37,7 +37,7 @@ from urllib3_future.contrib.webextensions._async.ws import (
     AsyncWebSocketExtensionFromHTTP,
 )
 
-from .chat_types import (
+from two_percent_detector.core.chat_types import (
     RECONNECT_DELAY,
     TWITCH,
     ChatMessage,
@@ -45,8 +45,8 @@ from .chat_types import (
     JsonValue,
     check_recent_ban,
 )
-from .emotes import EmoteCache
-from .ui import console
+from two_percent_detector.ui.terminal import console
+from two_percent_detector.utils.emotes import EmoteCache
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -58,7 +58,7 @@ if TYPE_CHECKING:
         AsyncWebSocketExtensionFromHTTP,
     )
 
-    from .chat_types import JsonValue
+    from two_percent_detector.core.chat_types import JsonValue
 
 logger: Logger = logging.getLogger(name=__name__)
 

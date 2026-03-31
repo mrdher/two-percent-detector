@@ -36,7 +36,15 @@ import sys
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final
 
-from .chat_types import (
+from two_percent_detector.config import (
+    DEFAULT_KICK_CHANNEL,
+    DEFAULT_KICK_ID,
+    DEFAULT_RUMBLE_CHANNEL,
+    DEFAULT_TWITCH_CHANNEL,
+    DEFAULT_TWITCH_ID,
+    KNOWN_BOTS,
+)
+from two_percent_detector.core.chat_types import (
     KICK,
     PLATFORM_COLOUR,
     PLATFORM_LABEL,
@@ -46,21 +54,12 @@ from .chat_types import (
     Platform,
     PlatformClient,
 )
-from .config import (
-    DEFAULT_KICK_CHANNEL,
-    DEFAULT_KICK_ID,
-    DEFAULT_RUMBLE_CHANNEL,
-    DEFAULT_TWITCH_CHANNEL,
-    DEFAULT_TWITCH_ID,
-    KNOWN_BOTS,
-)
-from .detector import MessageDetector
-from .emotes import strip_emojis, strip_invisible
-from .kick_monitor import KickChat, lookup_kick
-from .rumble_monitor import RumbleChat, lookup_rumble
-from .stats import ChatStats
-from .twitch_monitor import TwitchChat, lookup_twitch
-from .ui import (
+from two_percent_detector.core.detector import MessageDetector
+from two_percent_detector.core.stats import ChatStats
+from two_percent_detector.platforms.kick import KickChat, lookup_kick
+from two_percent_detector.platforms.rumble import RumbleChat, lookup_rumble
+from two_percent_detector.platforms.twitch import TwitchChat, lookup_twitch
+from two_percent_detector.ui.terminal import (
     console,
     print_alert,
     print_cleanup,
@@ -68,11 +67,16 @@ from .ui import (
     print_ready,
     print_stats,
 )
+from two_percent_detector.utils.emotes import strip_emojis, strip_invisible
 
 if TYPE_CHECKING:
     from logging import Logger
 
-    from .chat_types import ChatMessage, Platform, PlatformClient
+    from two_percent_detector.core.chat_types import (
+        ChatMessage,
+        Platform,
+        PlatformClient,
+    )
 
 # Logging
 logging.basicConfig(
