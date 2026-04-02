@@ -31,6 +31,7 @@ from two_percent_detector.core.chat_types import (
     RECONNECT_DELAY,
     RUMBLE,
     ChatMessage,
+    ClearChatEvent,
     check_recent_ban,
 )
 from two_percent_detector.ui.terminal import console
@@ -319,6 +320,7 @@ class RumbleChat:
     """
 
     __slots__ = (
+        "_on_clearchat",
         "_on_message",
         "_recent_bans",
         "_sse_url",
@@ -332,16 +334,19 @@ class RumbleChat:
         *,
         stream_id: str,
         on_message: Callable[[ChatMessage], None] | None = None,
+        on_clearchat: Callable[[ClearChatEvent], None] | None = None,
     ) -> None:
         """Initialise the Rumble chat client.
 
         Args:
             stream_id: Rumble stream ID (base-10 numeric string).
             on_message: Sync callback invoked for each chat message.
+            on_clearchat: Sync callback invoked for message deletion events.
         """
         self._stream_id: str = stream_id.strip()
         self._sse_url: str = _SSE_URL.format(stream_id=self._stream_id)
         self._on_message: Callable[[ChatMessage], None] | None = on_message
+        self._on_clearchat: Callable[[ClearChatEvent], None] | None = on_clearchat
         self._recent_bans: dict[str, float] = {}
         self._users: dict[str, JsonObj] = {}
         self.connected = asyncio.Event()
@@ -461,7 +466,7 @@ class RumbleChat:
                 loop.call_soon_threadsafe(callback=self.connected.set)
                 logger.info("Rumble SSE connected (stream %s)", self._stream_id)
         elif event_type in {"delete_messages", "delete_non_rant_messages"}:
-            self._handle_deletions(event_data=raw)
+            self._handle_deletions(event_data=raw, loop=loop)
 
     def _process_event_data(
         self,
@@ -488,11 +493,16 @@ class RumbleChat:
                 loop=loop,
             )
 
-    def _handle_deletions(self, event_data: JsonObj) -> None:
+    def _handle_deletions(
+        self,
+        event_data: JsonObj,
+        loop: asyncio.AbstractEventLoop,
+    ) -> None:
         """Process message deletion events for ban tracking.
 
         Args:
             event_data: Parsed JSON from a deletion event.
+            loop: Event loop for thread-safe callbacks.
         """
         data_raw: JsonValue = event_data.get("data")
         if not isinstance(data_raw, dict):
@@ -500,8 +510,26 @@ class RumbleChat:
 
         now: float = time.monotonic()
         user_id: JsonValue = data_raw.get("user_id")
-        if isinstance(user_id, int | str):
-            self._recent_bans[str(user_id)] = now
+        if not isinstance(user_id, int | str):
+            return
+
+        uid: str = str(user_id)
+        self._recent_bans[uid] = now
+
+        if self._on_clearchat is not None:
+            cached_user: JsonObj = self._users.get(uid, {})
+            username_raw: JsonValue = cached_user.get("username")
+            username: str = str(username_raw) if isinstance(username_raw, str) else uid
+
+            event = ClearChatEvent(
+                platform=RUMBLE,
+                username=username,
+                user_id=uid,
+                duration=0,
+                permanent=True,
+                ts=now,
+            )
+            loop.call_soon_threadsafe(self._on_clearchat, event)
 
     def _parse_message(self, msg_data: JsonObj) -> ChatMessage | None:
         """Convert a Rumble message JSON block into a :class:`ChatMessage`.

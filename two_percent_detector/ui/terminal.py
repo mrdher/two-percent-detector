@@ -16,8 +16,10 @@ from rich.panel import Panel
 from rich.text import Text
 
 from two_percent_detector.core.chat_types import (
+    KICK,
     PLATFORM_COLOUR,
     PLATFORM_LABEL,
+    RUMBLE,
     ClearChatEvent,
 )
 from two_percent_detector.core.detector import (
@@ -159,6 +161,16 @@ def print_stats(
         title = "[dim]Chat Stats[/dim]"
         border = "dim"
 
+    # Kick does not expose moderation events — hide the bans line.
+    # Rumble only reports message deletions — label accordingly.
+    if platform == KICK:
+        bans_section: str = ""
+    elif platform == RUMBLE:
+        mod_total: int = stats.ban_count + stats.timeout_count
+        bans_section = f"[bold]Mod acts:[/bold]  {mod_total} deletions\n"
+    else:
+        bans_section = f"[bold]Bans:[/bold]      {bans_line}\n"
+
     console.print()
     console.print(
         Panel(
@@ -166,7 +178,7 @@ def print_stats(
                 f"[bold]Duration:[/bold]  {stats.elapsed_str}\n"
                 f"{tracked_line}"
                 f"[bold]Messages:[/bold]  {messages_line}\n"
-                f"[bold]Bans:[/bold]      {bans_line}\n"
+                f"{bans_section}"
                 f"[bold]Rates:[/bold]     {rates_line}\n"
                 f"[bold]Avg rate:[/bold]  "
                 f"{stats.avg_messages_per_second:.2f} msg/s (session)\n"
@@ -245,7 +257,10 @@ def print_clearchat(event: ClearChatEvent) -> None:
     """
     if not event.username:
         return
-    kind: str = "banned" if event.permanent else f"timed-out ({event.duration}s)"
+    if event.platform == RUMBLE:
+        kind: str = "messages deleted by mod"
+    else:
+        kind = "banned" if event.permanent else f"timed-out ({event.duration}s)"
     plat: str = PLATFORM_LABEL.get(event.platform, event.platform)
     console.print(
         f"[dim]  \u26a1 [{plat}] {event.username} ({event.user_id}) {kind}[/dim]"

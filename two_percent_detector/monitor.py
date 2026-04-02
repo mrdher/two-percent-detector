@@ -160,6 +160,7 @@ class Monitor:
             self._clients[RUMBLE] = RumbleChat(
                 stream_id=cfg.rumble_stream_id,
                 on_message=self._on_message,
+                on_clearchat=self._on_clearchat,
             )
 
         for platform in self._clients:
