@@ -1,22 +1,9 @@
 """Platform-specific anonymous chat clients.
 
-Each module in this subpackage handles one platform's transport layer — connection
-lifecycle, message parsing, emote stripping, and ban detection — and exposes a class
-that satisfies the `core.chat_types.PlatformClient` protocol plus a convenience lookup
-helper.
-
-All three clients require no OAuth token and connect anonymously in read-only mode.
-
-Modules:
-- `twitch`: Contains `TwitchChat` (anonymous IRC WebSocket) and `lookup_twitch` /
-`fetch_twitch_user` for resolving a login name to a numeric user ID via the public
-ivr.fi API.
-- `kick`: Contains `KickChat` (Pusher WebSocket) and `lookup_kick` /
-`fetch_channel_info` for resolving a channel slug to its chatroom ID via the Kick REST
-API.
-- `rumble`: Contains `RumbleChat` (Server-Sent Events) and `lookup_rumble` /
-`fetch_rumble_stream_id` for resolving a channel name to a live-stream numeric ID by
-scraping the Rumble channel page and calling the oembed + embed JS APIs.
+Each module handles one platform's transport layer — connection lifecycle, message
+parsing, emote stripping, and ban detection — and exposes a class that satisfies the
+``PlatformClient`` protocol.
+All three clients connect anonymously in read-only mode; no OAuth token is required.
 """
 
 from two_percent_detector.platforms.kick import (
