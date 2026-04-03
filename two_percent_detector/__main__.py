@@ -1,4 +1,4 @@
-"""Allow running the package directly: ``python -m two_percent_detector``."""
+"""Allow running the package directly: `python -m two_percent_detector`."""
 
 from two_percent_detector.monitor import main
 

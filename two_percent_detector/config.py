@@ -1,10 +1,10 @@
 """Central configuration — saved channel defaults and user whitelist.
 
 All platform-specific default channel names and pre-resolved IDs live here so that every
-entry point (``monitor``, ``twitch_monitor``) shares a single source of truth.
+entry point (`monitor`, `twitch_monitor`) shares a single source of truth.
 
 Edit the constants below to change which channels are used when a CLI flag is passed
-without an explicit value (e.g. ``uv run monitor --twitch``).
+without an explicit value (e.g. `uv run monitor --twitch`).
 """
 
 from __future__ import annotations

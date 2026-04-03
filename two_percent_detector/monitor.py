@@ -5,12 +5,11 @@ terminal alert whenever a user sends the same (or substantially similar) message
 multiple times within a rolling detection window.
 
 Platform support:
-
-- **Twitch** — anonymous IRC WebSocket.
+- `Twitch` — anonymous IRC WebSocket.
 Twitch-native emotes are stripped via IRC tag positions; 7TV, FFZ, and BTTV emotes are
 stripped via the cached emote-word list.
-- **Kick** — anonymous Pusher WebSocket.
-- **Rumble** — anonymous SSE stream.
+- `Kick` — anonymous Pusher WebSocket.
+- `Rumble` — anonymous SSE stream.
 
 Emoji characters are stripped on all platforms.
 Moderators, the broadcaster, and known bots are automatically ignored.
@@ -123,7 +122,7 @@ class Monitor:
     """Read-only multi-platform chat monitor.
 
     Lifecycle:
-        ``run()`` → connect all platforms → ``_on_message`` / ``_on_clearchat``
+        `run()` → connect all platforms → `_on_message` / `_on_clearchat`
     """
 
     __slots__ = (
@@ -209,7 +208,7 @@ class Monitor:
 
     # Startup
     def _print_ready(self) -> None:
-        """Build platform descriptions and delegate to :func:`ui.print_ready`."""
+        """Build platform descriptions and delegate to `ui.print_ready`."""
         # Pad labels to align channel names.
         max_label: int = max(len(v) for v in PLATFORM_LABEL.values())
         platforms: list[str] = [
@@ -260,7 +259,7 @@ class Monitor:
 
     # CLEARCHAT callback
     def _on_clearchat(self, event: ClearChatEvent) -> None:
-        """Record ban stats and delegate display to :func:`ui.print_clearchat`."""
+        """Record ban stats and delegate display to `ui.print_clearchat`."""
         if not event.username:
             return
         self._stats.record_ban(permanent=event.permanent)
@@ -335,13 +334,13 @@ class Monitor:
 
 # CLI
 def _build_parser() -> argparse.ArgumentParser:
-    """Build the argument parser for the ``monitor`` command.
+    """Build the argument parser for the `monitor` command.
 
     Each platform flag accepts an optional value.
-    When the flag is present **without** a value the saved default is used.
+    When the flag is present without a value the saved default is used.
 
     Returns:
-        argparse.ArgumentParser: Configured argument parser.
+        Configured argument parser.
     """
     parser = argparse.ArgumentParser(
         prog="monitor",
@@ -385,7 +384,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _build_config(args: argparse.Namespace) -> PlatformConfig:
-    """Resolve CLI arguments into a :class:`PlatformConfig`.
+    """Resolve CLI arguments into a `PlatformConfig`.
 
     Performs Twitch ID and Rumble stream-ID lookups as needed.
 
@@ -393,7 +392,7 @@ def _build_config(args: argparse.Namespace) -> PlatformConfig:
         args: Parsed CLI namespace.
 
     Returns:
-        PlatformConfig: Fully resolved platform configuration.
+        Fully resolved platform configuration.
     """
     twitch_name: str = args.twitch.lower().strip() if args.twitch else ""
     twitch_id: str = ""
@@ -442,7 +441,7 @@ def _build_config(args: argparse.Namespace) -> PlatformConfig:
 
 
 def main() -> None:
-    """Entry point for the ``monitor`` console script."""
+    """Entry point for the `monitor` console script."""
     parser: argparse.ArgumentParser = _build_parser()
     args: argparse.Namespace = parser.parse_args()
 

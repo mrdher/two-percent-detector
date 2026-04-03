@@ -7,13 +7,13 @@ The client:
 1. Fetches the chatroom ID from the Kick REST API.
 2. Opens a WebSocket to the Pusher cluster.
 3. Subscribes to the chatroom channel.
-4. Dispatches parsed chat messages via the ``on_message`` callback.
+4. Dispatches parsed chat messages via the `on_message` callback.
 
 Pusher protocol details:
-- Connection URL: ``wss://ws-us2.pusher.com/app/{key}?protocol=7&client=js&version=8.4.0``
-- Subscribe: ``{"event":"pusher:subscribe","data":{"channel":"chatrooms.{id}.v2"}}``
-- Chat events: ``App\Events\ChatMessageEvent``
-- Ping/pong: ``pusher:ping`` / ``pusher:pong``
+- Connection URL: `wss://ws-us2.pusher.com/app/{key}?protocol=7&client=js&version=8.4.0`
+- Subscribe: `{"event":"pusher:subscribe","data":{"channel":"chatrooms.{id}.v2"}}`
+- Chat events: `App\Events\ChatMessageEvent`
+- Ping/pong: `pusher:ping` / `pusher:pong`
 """
 
 from __future__ import annotations
@@ -79,7 +79,7 @@ def fetch_channel_info(slug: str) -> tuple[int, int]:
         slug: Kick channel username / slug (lowercase).
 
     Returns:
-        tuple[int, int]: Tuple of ``(chatroom_id, user_id)``.
+        Tuple of `(chatroom_id, user_id)`.
 
     Raises:
         TypeError: If the channel is not found or the response is malformed.
@@ -117,15 +117,15 @@ def fetch_channel_info(slug: str) -> tuple[int, int]:
 
 
 def lookup_kick(slug: str) -> tuple[int, int]:
-    """Resolve a Kick channel slug to ``(chatroom_id, user_id)``.
+    """Resolve a Kick channel slug to `(chatroom_id, user_id)`.
 
-    Wraps :func:`fetch_channel_info` with console output and ``sys.exit(1)`` on failure.
+    Wraps `fetch_channel_info` with console output and `sys.exit(1)` on failure.
 
     Args:
         slug: Kick channel slug (username).
 
     Returns:
-        tuple[int, int]: Tuple of ``(chatroom_id, user_id)``.
+        Tuple of `(chatroom_id, user_id)`.
     """
     try:
         chatroom_id, user_id = fetch_channel_info(slug=slug)
@@ -140,15 +140,15 @@ def lookup_kick(slug: str) -> tuple[int, int]:
 
 
 def _parse_pusher_data(raw: JsonValue | None) -> JsonObj | None:
-    """Parse the ``data`` field of a Pusher message.
+    """Parse the `data` field of a Pusher message.
 
     Pusher wraps per-event data as a JSON-encoded string inside the outer JSON frame.
 
     Args:
-        raw: The ``data`` value from the outer Pusher message.
+        raw: The `data` value from the outer Pusher message.
 
     Returns:
-        JsonObj | None: Parsed dict, or ``None`` if parsing fails.
+        Parsed dict, or `None` if parsing fails.
     """
     if isinstance(raw, dict):
         return raw
@@ -163,14 +163,13 @@ def _parse_pusher_data(raw: JsonValue | None) -> JsonObj | None:
 
 
 def _extract_message(data: JsonObj) -> ChatMessage | None:
-    """Convert a Kick chat event payload into a :class:`ChatMessage`.
+    """Convert a Kick chat event payload into a `ChatMessage`.
 
     Args:
         data: Parsed event data from a Pusher chat event.
 
     Returns:
-        ChatMessage | None: A ``ChatMessage`` or ``None`` if required fields are
-        missing.
+        A `ChatMessage` or `None` if required fields are missing.
     """
     # Message text.
     content: JsonValue = data.get("content") or data.get("message") or data.get("text")
@@ -234,8 +233,8 @@ class KickChat:
         await kick.run()  # blocks until cancelled
 
     Attributes:
-        connected: :class:`asyncio.Event` set once the client has subscribed to the
-        chatroom and is receiving events.
+        connected: `asyncio.Event` set once the client has subscribed to the chatroom
+        and is receiving events.
     """
 
     __slots__ = (
@@ -259,8 +258,8 @@ class KickChat:
 
         Args:
             channel_name: Kick channel slug (username).
-            chatroom_id: Pre-resolved chatroom ID (skips the API lookup in :meth:`run`
-            when non-zero).
+            chatroom_id: Pre-resolved chatroom ID (skips the API lookup in `run` when
+            non-zero).
             on_message: Sync callback invoked for each chat message.
         """
         self._channel_name: str = channel_name.lower().strip()
@@ -275,29 +274,29 @@ class KickChat:
         """Check whether a user was banned recently.
 
         Kick does not expose anonymous ban events via Pusher, so this always returns
-        ``False`` unless future moderation event support is added.
+        `False` unless future moderation event support is added.
 
         Args:
             user_id: Kick user ID to look up.
             within: Maximum age in seconds.
 
         Returns:
-            bool: ``True`` if a moderation event targeting this user was received within
-            the given time window.
+            `True` if a moderation event targeting this user was received within the
+            given time window.
         """
         return check_recent_ban(bans=self._recent_bans, user_id=user_id, within=within)
 
     def clean_text(self, msg: ChatMessage) -> str:
         """Strip Kick emote tokens and 7TV emotes from a message.
 
-        Removes native ``[emote:ID:NAME]`` tokens first, then strips any words matching
+        Removes native `[emote:ID:NAME]` tokens first, then strips any words matching
         cached 7TV emote names.
 
         Args:
             msg: The chat message to clean.
 
         Returns:
-            str: Message text with emote tokens removed.
+            Message text with emote tokens removed.
         """
         text: str = strip_kick_emotes(text=msg.text)
         return self._emote_cache.strip_emotes(text=text)

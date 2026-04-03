@@ -24,7 +24,7 @@ _MINUTE: Final[float] = 60.0
 class ChatStats:
     """Session-scoped chat statistics tracker.
 
-    Call :meth:`record_message` for every incoming chat message.
+    Call `record_message` for every incoming chat message.
     The class maintains rolling-window timestamps for rate calculation and per-user
     counters for leaderboard queries.
     """
@@ -114,7 +114,7 @@ class ChatStats:
         """Increment the ban or timeout counter.
 
         Args:
-            permanent: ``True`` for permanent bans, ``False`` for timeouts.
+            permanent: `True` for permanent bans, `False` for timeouts.
         """
         if permanent:
             self.ban_count += 1
@@ -136,7 +136,7 @@ class ChatStats:
             msg/s, 60.0 for msg/min, etc.).
 
         Returns:
-            float: Scaled message rate, or ``0.0`` if no time has elapsed.
+            Scaled message rate, or `0.0` if no time has elapsed.
         """
         now: float = time.monotonic()
         cutoff: float = now - window
@@ -167,7 +167,7 @@ class ChatStats:
 
     @property
     def elapsed_str(self) -> str:
-        """Human-readable session duration (e.g. ``1h23m45s``)."""
+        """Human-readable session duration (e.g. `1h23m45s`)."""
         elapsed: int = int(time.monotonic() - self.start_time)
         h, rem = divmod(elapsed, 3600)
         m, s = divmod(rem, 60)
@@ -176,14 +176,13 @@ class ChatStats:
         return f"{m}m{s:02d}s"
 
     def top_chatters(self, n: int = 5) -> list[tuple[str, int]]:
-        """Return the *n* most active users.
+        """Return the `n` most active users.
 
         Args:
             n: Number of users to return.
 
         Returns:
-            list[tuple[str, int]]: List of ``(username, message_count)`` pairs sorted by
-            descending activity.
+            List of `(username, message_count)` pairs sorted by descending activity.
         """
         return [
             (self._user_names.get(uid, uid), count)
@@ -194,14 +193,14 @@ class ChatStats:
         """Build a Unicode sparkline of messages-per-minute.
 
         Each character represents one minute.
-        The most recent *width* minutes are shown using Unicode block elements for fill
+        The most recent `width` minutes are shown using Unicode block elements for fill
         level.
 
         Args:
             width: Maximum number of minute buckets to display.
 
         Returns:
-            str: Sparkline string, or an empty string if no data is available.
+            Sparkline string, or an empty string if no data is available.
         """
         buckets: list[int] = list[int](self._minute_buckets)
         if self._current_minute_count > 0:

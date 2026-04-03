@@ -1,9 +1,9 @@
 """Discord webhook integration for forwarding alerts.
 
 Sends spam-detection alerts to a Discord channel via a webhook URL.
-The webhook is optional: if ``WEBHOOK_URL`` is empty the module is a no-op.
+The webhook is optional: if `WEBHOOK_URL` is empty the module is a no-op.
 
-Uses ``niquests.AsyncSession`` to post JSON payloads without adding any extra
+Uses `niquests.AsyncSession` to post JSON payloads without adding any extra
 dependencies.
 """
 
@@ -80,7 +80,7 @@ class AlertContext:
         channel_name: Channel being monitored.
         window_minutes: Rolling detection window in minutes.
         alert_number: Sequential alert counter for this session.
-        platform: Source platform (``"twitch"``, ``"kick"``, or ``"rumble"``).
+        platform: Source platform (`"twitch"`, `"kick"`, or `"rumble"`).
     """
 
     chatter_name: str
@@ -108,7 +108,7 @@ class AlertContext:
 async def send_alert(ctx: AlertContext) -> None:
     """Post a spam alert to Discord as an embed.
 
-    If ``WEBHOOK_URL`` is empty the call returns immediately without making any network
+    If `WEBHOOK_URL` is empty the call returns immediately without making any network
     request.
 
     Args:

@@ -2,36 +2,35 @@
 
 Provides two categories of functionality:
 
-1. **Third-party emote cache** (Twitch and Kick) — fetches emote sets from 7TV,
-FrankerFaceZ (FFZ), and BetterTTV (BTTV) and exposes a fast ``frozenset``-based lookup
-to strip emote words from messages.
+1. Third-party emote cache (Twitch and Kick) — fetches emote sets from 7TV, FrankerFaceZ
+(FFZ), and BetterTTV (BTTV) and exposes a fast `frozenset`-based lookup to strip emote
+words from messages.
 7TV is available for both Twitch and Kick; FFZ and BTTV are Twitch-exclusive.
-Twitch-native emotes are handled separately via the ``emotes`` IRC tag and do not
-require an API call.
+Twitch-native emotes are handled separately via the `emotes` IRC tag and do not require
+an API call.
 
-2. **Cross-platform text stripping** — removes emoji characters, invisible Unicode
-codepoints, Kick ``[emote:ID:NAME]`` tokens, and Rumble ``:name:`` emote tokens from
-message text.
+2. Cross-platform text stripping — removes emoji characters, invisible Unicode
+codepoints, Kick `[emote:ID:NAME]` tokens, and Rumble `:name:` emote tokens from message
+text.
 
 All provider endpoints (global + channel for each) are fetched concurrently using HTTP/2
-multiplexed streams over a single ``niquests.AsyncSession``.
-Requests to the same host share one TCP connection; ``session.gather()`` resolves all
+multiplexed streams over a single `niquests.AsyncSession`.
+Requests to the same host share one TCP connection; `session.gather()` resolves all
 pending streams in a single batch for maximum throughput.
-Servers that advertise ``Alt-Svc: h3`` (currently BTTV and Kick) are transparently
+Servers that advertise `Alt-Svc: h3` (currently BTTV and Kick) are transparently
 upgraded to HTTP/3 QUIC on subsequent connections.
 
 Provider failures are logged as warnings and do not crash the monitor.
-The cache refreshes every ``REFRESH_INTERVAL_SECONDS`` in the background.
+The cache refreshes every `REFRESH_INTERVAL_SECONDS` in the background.
 
-HTTP is handled by ``niquests.AsyncSession``, a modern drop-in replacement for
-``requests`` with native asyncio, HTTP/2 multiplexing, and HTTP/3 QUIC support.
+HTTP is handled by `niquests.AsyncSession`, a modern drop-in replacement for `requests`
+with native asyncio, HTTP/2 multiplexing, and HTTP/3 QUIC support.
 
 Note:
-``AsyncSession.get()`` returns ``Response | AsyncResponse``.
-In multiplexed mode, ``get()`` returns a *lazy* ``AsyncResponse`` whose body is only
-resolved after ``await session.gather()``.
-The :func:`_json` helper abstracts over both flavours so callers can always
-``await _json(r)``.
+`AsyncSession.get()` returns `Response | AsyncResponse`.
+In multiplexed mode, `get()` returns a lazy `AsyncResponse` whose body is only resolved
+after `await session.gather()`.
+The `_json` helper abstracts over both flavours so callers can always `await _json(r)`.
 """
 
 from __future__ import annotations
@@ -135,79 +134,79 @@ _INVISIBLE_PATTERN: Final[re.Pattern[str]] = re.compile(
     rf"[{_INVISIBLE_CHARS}]+",
 )
 
-# Kick embeds emotes as ``[emote:ID:NAME]`` in the message text.
+# Kick embeds emotes as `[emote:ID:NAME]` in the message text.
 _KICK_EMOTE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"\[emote:\d+:[^\]]*\]",
 )
 
-# Rumble embeds emotes as ``:name:`` (e.g. ``:r+usa:``, ``:laughing:``).
+# Rumble embeds emotes as `:name:` (e.g. `:r+usa:`, `:laughing:`).
 _RUMBLE_EMOTE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r":[\w+]+:",
 )
 
 
 def strip_emojis(text: str) -> str:
-    """Remove emoji characters from *text*.
+    """Remove emoji characters from `text`.
 
     Args:
         text: Message text (emotes already removed).
 
     Returns:
-        str: Text with all emoji sequences removed.
+        Text with all emoji sequences removed.
         May be empty if the message consisted entirely of emojis.
     """
     return _EMOJI_PATTERN.sub("", text)
 
 
 def strip_invisible(text: str) -> str:
-    """Remove invisible / zero-width Unicode characters from *text*.
+    """Remove invisible / zero-width Unicode characters from `text`.
 
     Args:
         text: Message text.
 
     Returns:
-        str: Text with invisible codepoints removed.
+        Text with invisible codepoints removed.
     """
     return _INVISIBLE_PATTERN.sub("", text)
 
 
 def strip_kick_emotes(text: str) -> str:
-    """Remove Kick ``[emote:ID:NAME]`` tokens from *text*.
+    """Remove Kick `[emote:ID:NAME]` tokens from `text`.
 
     Args:
         text: Raw Kick message text.
 
     Returns:
-        str: Text with emote tokens removed.
+        Text with emote tokens removed.
     """
     return _KICK_EMOTE_PATTERN.sub("", text)
 
 
 def strip_rumble_emotes(text: str) -> str:
-    """Remove Rumble ``:name:`` emote tokens from *text*.
+    """Remove Rumble `:name:` emote tokens from `text`.
 
     Args:
         text: Raw Rumble message text.
 
     Returns:
-        str: Text with emote tokens removed.
+        Text with emote tokens removed.
     """
     return _RUMBLE_EMOTE_PATTERN.sub("", text)
 
 
 # Response helpers
 async def _json(response: Response | AsyncResponse) -> JsonValue:
-    """Await ``response.json()`` regardless of sync/async flavour.
+    """Await `response.json()` regardless of sync/async flavour.
 
-    ``niquests.AsyncSession`` may return either ``Response`` (sync) or ``AsyncResponse``
+    `niquests.AsyncSession` may return either `Response` (sync) or `AsyncResponse`
     depending on connection pool configuration.
-    This helper normalises the two code paths so callers can always ``await _json(r)``.
+    This helper normalises the two code paths so callers can always `await _json(r)`.
 
     Args:
-        response: A response object from ``niquests.AsyncSession``.
+        response: A response object from `niquests.AsyncSession`.
 
     Returns:
-        JsonValue: The parsed JSON body.
+        The parsed JSON body.
     """
     result: CoroutineType[Any, Any, Any] | Any = response.json()
     if inspect.isawaitable(object=result):
@@ -220,7 +219,7 @@ class EmoteCache:
     """Aggregated emote name set from 7TV, FFZ, and BTTV.
 
     Provider endpoints are fetched concurrently over HTTP/2 multiplexed streams and
-    resolved in a single batch via ``session.gather()``.
+    resolved in a single batch via `session.gather()`.
     A provider failure only removes that provider's contribution; the remaining sets are
     merged normally.
 
@@ -283,18 +282,18 @@ class EmoteCache:
 
     # Public API
     def strip_emotes(self, text: str) -> str:
-        """Remove known emote words from *text*.
+        """Remove known emote words from `text`.
 
         Words are split on whitespace.
         Any token that exactly matches a cached emote name is dropped.
         The remaining tokens are re-joined with single spaces.
-        Emote names are case-sensitive (``KEKW`` ≠ ``kekw``).
+        Emote names are case-sensitive (`KEKW` ≠ `kekw`).
 
         Args:
             text: Message text with Twitch-native emotes already removed.
 
         Returns:
-            str: Message text with third-party emote tokens removed.
+            Message text with third-party emote tokens removed.
             May be empty if the message consisted entirely of emotes.
         """
         if not text or not self._emotes:
@@ -335,8 +334,8 @@ class EmoteCache:
         """Fetch provider endpoints and atomically swap the cache.
 
         Requests are fired concurrently over HTTP/2 multiplexed streams on a single
-        ``AsyncSession`` and resolved in one batch via ``session.gather()``.
-        Servers advertising ``Alt-Svc: h3`` are transparently upgraded to HTTP/3 QUIC.
+        `AsyncSession` and resolved in one batch via `session.gather()`.
+        Servers advertising `Alt-Svc: h3` are transparently upgraded to HTTP/3 QUIC.
 
         7TV endpoints are fetched for every platform; FFZ and BTTV are Twitch-exclusive.
 
@@ -411,13 +410,14 @@ class EmoteCache:
         )
 
     # Response parsers — called on the resolved JSON body of each endpoint.
+
     # 7TV
     @staticmethod
     def _parse_7tv_global(data: JsonValue) -> set[str]:
         """Parse the 7TV global emote set.
 
         Returns:
-            set[str]: Set of global 7TV emote names.
+            Set of global 7TV emote names.
         """
         if not isinstance(data, dict):
             return set[str]()
@@ -435,7 +435,7 @@ class EmoteCache:
         """Parse the channel-specific 7TV emote set.
 
         Returns:
-            set[str]: Set of channel 7TV emote names.
+            Set of channel 7TV emote names.
         """
         if not isinstance(data, dict):
             return set[str]()
@@ -456,10 +456,10 @@ class EmoteCache:
     def _parse_ffz(data: JsonValue) -> set[str]:
         """Parse emote names from an FFZ API response body.
 
-        FFZ nests emotes under ``data["sets"][<set_id>]["emoticons"]``.
+        FFZ nests emotes under `data["sets"][<set_id>]["emoticons"]`.
 
         Returns:
-            set[str]: Flat set of emote name strings.
+            Flat set of emote name strings.
         """
         if not isinstance(data, dict):
             return set[str]()
@@ -487,7 +487,7 @@ class EmoteCache:
         """Parse the BTTV global emote set.
 
         Returns:
-            set[str]: Set of global BTTV emote codes.
+            Set of global BTTV emote codes.
         """
         if not isinstance(data, list):
             return set[str]()
@@ -502,7 +502,7 @@ class EmoteCache:
         """Parse the channel and shared BTTV emote sets.
 
         Returns:
-            set[str]: Combined set of channel and shared BTTV emote codes.
+            Combined set of channel and shared BTTV emote codes.
         """
         if not isinstance(data, dict):
             return set[str]()

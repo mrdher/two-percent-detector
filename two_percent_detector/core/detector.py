@@ -17,15 +17,16 @@ from pathlib import Path
 from typing import Final
 
 # Tuneable parameters
+
 # Rolling time window in seconds (default: 10 minutes).
 WINDOW_SECONDS: Final[float] = 10.0 * 60.0
 
 # Number of similar messages required to trigger an alert.
 REPEAT_COUNT: Final[int] = 3
 
-# Minimum ``SequenceMatcher`` ratio to consider two messages similar.
-# Range ``0.0`` (anything matches) to ``1.0`` (exact match required).
-# The default ``0.82`` tolerates typos, extra punctuation, and minor wording changes.
+# Minimum `SequenceMatcher` ratio to consider two messages similar.
+# Range `0.0` (anything matches) to `1.0` (exact match required).
+# The default `0.82` tolerates typos, extra punctuation, and minor wording changes.
 SIMILARITY_THRESHOLD: Final[float] = 0.82
 
 # Maximum message records kept per user in memory.
@@ -45,7 +46,7 @@ _NON_WORD_PATTERN: Final[re.Pattern[str]] = re.compile(r"[^\w\s]", flags=re.UNIC
 _WHITESPACE_PATTERN: Final[re.Pattern[str]] = re.compile(r"\s+")
 
 # Collapses every run of identical characters to a single character.
-# Used by the common-word checker; more aggressive than ``_CHAR_REPEAT_PATTERN``.
+# Used by the common-word checker; more aggressive than `_CHAR_REPEAT_PATTERN`.
 _DEDUP_CHAR_PATTERN: Final[re.Pattern[str]] = re.compile(r"(.)\1+")
 
 # Collapses repeated 1-3 character syllables (e.g. "hahahahaha" → "haha").
@@ -68,7 +69,7 @@ class _MessageRecord:
 
     Attributes:
         text_norm: Normalised form of the original message text.
-        ts: ``time.monotonic()`` value at the time of receipt.
+        ts: `time.monotonic()` value at the time of receipt.
     """
 
     text_norm: str
@@ -83,7 +84,7 @@ def _normalize(text: str) -> str:
 
     1. Unicode NFKC normalisation (resolves common homoglyphs).
     2. Case-fold (locale-aware lowercase).
-    3. Collapse runs of 3+ identical characters to 2 (``looool`` → ``lool``).
+    3. Collapse runs of 3+ identical characters to 2 (`looool` → `lool`).
     4. Strip all non-alphanumeric, non-whitespace characters.
     5. Collapse multiple whitespace characters into a single space.
 
@@ -91,7 +92,7 @@ def _normalize(text: str) -> str:
         text: Raw chat message text.
 
     Returns:
-        str: Normalised string suitable for fuzzy comparison.
+        Normalised string suitable for fuzzy comparison.
     """
     text = unicodedata.normalize("NFKC", text).casefold().strip()
     text = _CHAR_REPEAT_PATTERN.sub(r"\1\1", text)
@@ -100,23 +101,23 @@ def _normalize(text: str) -> str:
 
 
 def _is_common_word(normalized: str) -> bool:
-    """Check whether *normalized* is a variant of a common filler word.
+    """Check whether `normalized` is a variant of a common filler word.
 
     Besides an exact lookup the function also tries two relaxations:
 
-    1. **Character dedup** — collapse every run of identical characters to one
-    (``loll`` → ``lol``, ``niceee`` → ``nice``).
-    2. **Syllable dedup** — collapse repeated 1-3 character syllables to two repetitions
-    (``hahahahaha`` → ``haha``).
+    1. Character dedup — collapse every run of identical characters to one
+    (`loll` → `lol`, `niceee` → `nice`).
+    2. Syllable dedup — collapse repeated 1-3 character syllables to two repetitions
+    (`hahahahaha` → `haha`).
 
-    Single-character results (e.g. ``"2"`` from ``"2222222222"``) are always treated as
+    Single-character results (e.g. `"2"` from `"2222222222"`) are always treated as
     filler.
 
     Args:
         normalized: Already-normalised message text.
 
     Returns:
-        bool: ``True`` if the text should be ignored as filler.
+        `True` if the text should be ignored as filler.
     """
     if normalized in _COMMON_WORDS:
         return True
@@ -137,19 +138,19 @@ def _are_similar(a: str, b: str) -> bool:
 
     - Two empty strings are considered equal.
     - An empty string is never similar to a non-empty one.
-    - Very short strings (at most ``_SHORT_TEXT_THRESHOLD`` characters) require exact
+    - Very short strings (at most `_SHORT_TEXT_THRESHOLD` characters) require exact
     equality to avoid false positives.
 
-    For longer strings, ``SequenceMatcher.quick_ratio`` is evaluated first as a cheap
+    For longer strings, `SequenceMatcher.quick_ratio` is evaluated first as a cheap
     upper bound.
-    The full ``ratio`` is only computed when the quick bound exceeds the threshold.
+    The full `ratio` is only computed when the quick bound exceeds the threshold.
 
     Args:
         a: First normalised message.
         b: Second normalised message.
 
     Returns:
-        bool: ``True`` if the messages are similar enough to be counted as repetitions.
+        `True` if the messages are similar enough to be counted as repetitions.
     """
     if not a or not b:
         return a == b
@@ -162,8 +163,8 @@ def _are_similar(a: str, b: str) -> bool:
 
     matcher: SequenceMatcher[str] = SequenceMatcher[str](None, a, b, autojunk=False)
 
-    # ``quick_ratio`` is a cheap upper bound; skip the full O(n²)
-    # ``ratio`` if it already falls below the threshold.
+    # `quick_ratio` is a cheap upper bound; skip the full O(n²)
+    # `ratio` if it already falls below the threshold.
     if matcher.quick_ratio() < SIMILARITY_THRESHOLD:
         return False
 
@@ -174,14 +175,14 @@ def _are_similar(a: str, b: str) -> bool:
 class MessageDetector:
     """Per-user repetition detector with fuzzy matching.
 
-    Each call to :meth:`process` evaluates whether the supplied message is the *n*-th
-    similar message sent by that user within the rolling ``WINDOW_SECONDS`` window
-    (where *n* = ``REPEAT_COUNT``).
+    Each call to `process` evaluates whether the supplied message is the n-th similar
+    message sent by that user within the rolling `WINDOW_SECONDS` window
+    (where n = `REPEAT_COUNT`).
 
-    Messages from other users do **not** reset any user's history.
+    Messages from other users do not reset any user's history.
 
-    Complexity per call is ``O(N)`` where *N* = ``MAX_HISTORY_PER_USER`` (bounded
-    constant), so the detector is safe for high-volume channels.
+    Complexity per call is `O(N)` where N = `MAX_HISTORY_PER_USER` (bounded constant),
+    so the detector is safe for high-volume channels.
 
     Example:
         >>> d = MessageDetector()
@@ -212,8 +213,8 @@ class MessageDetector:
             text: Pre-cleaned message text (emotes already stripped).
 
         Returns:
-            int: Total number of similar messages (including this one) in the window
-            when the threshold is met or exceeded, ``0`` otherwise.
+            Total number of similar messages (including this one) in the window when the
+            threshold is met or exceeded, `0` otherwise.
         """
         now: float = time.monotonic()
         cutoff: float = now - WINDOW_SECONDS
@@ -243,7 +244,7 @@ class MessageDetector:
         channels.
 
         Returns:
-            int: Number of user entries removed.
+            Number of user entries removed.
         """
         now: float = time.monotonic()
         cutoff: float = now - WINDOW_SECONDS

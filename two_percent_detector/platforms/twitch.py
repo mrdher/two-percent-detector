@@ -1,25 +1,25 @@
 """Twitch chat monitor (anonymous, read-only).
 
 Connects to a Twitch channel via the public IRC WebSocket endpoint as an anonymous
-viewer (``justinfan`` nick) and dispatches parsed events via callbacks.
+viewer (`justinfan` nick) and dispatches parsed events via callbacks.
 No OAuth token is required.
 
 Two IRC command types are handled:
-- ``PRIVMSG``: Standard chat messages, dispatched as :class:`ChatMessage` via the
-``on_message`` callback.
-- ``CLEARCHAT``: Bans and timeouts, dispatched as :class:`ClearChatEvent` and stored for
-later lookup via :meth:`TwitchChat.was_recently_banned`.
+- `PRIVMSG`: Standard chat messages, dispatched as `ChatMessage` via the `on_message`
+callback.
+- `CLEARCHAT`: Bans and timeouts, dispatched as `ClearChatEvent` and stored for later
+lookup via `TwitchChat.was_recently_banned`.
 
-``PING`` keepalives from the server are answered with ``PONG`` automatically.
+`PING` keepalives from the server are answered with `PONG` automatically.
 
-IRC message tags (``twitch.tv/tags`` capability) provide:
-- ``mod``, ``badges`` — moderator / broadcaster / VIP detection.
-- ``emotes`` — Twitch-native emote positions for stripping.
-- ``user-id``, ``display-name`` — user identity.
-- ``ban-duration``, ``target-user-id`` — ban/timeout metadata.
+IRC message tags (`twitch.tv/tags` capability) provide:
+- `mod`, `badges` — moderator / broadcaster / VIP detection.
+- `emotes` — Twitch-native emote positions for stripping.
+- `user-id`, `display-name` — user identity.
+- `ban-duration`, `target-user-id` — ban/timeout metadata.
 
-Third-party emote names (7TV, FFZ, BTTV) are fetched by :class:`~emotes.EmoteCache` and
-stripped from message text alongside Twitch-native emotes.
+Third-party emote names (7TV, FFZ, BTTV) are fetched by `emotes.EmoteCache` and stripped
+from message text alongside Twitch-native emotes.
 """
 
 from __future__ import annotations
@@ -92,7 +92,7 @@ _REQUEST_TIMEOUT: Final[int] = 10
 
 
 def fetch_twitch_user(login: str) -> tuple[str, str, str]:
-    """Resolve a Twitch login to ``(login, display_name, user_id)``.
+    """Resolve a Twitch login to `(login, display_name, user_id)`.
 
     Uses the public ivr.fi API — no OAuth token required.
 
@@ -100,7 +100,7 @@ def fetch_twitch_user(login: str) -> tuple[str, str, str]:
         login: Twitch login name (case-insensitive).
 
     Returns:
-        tuple[str, str, str]: Tuple of ``(login, display_name, user_id)``.
+        Tuple of `(login, display_name, user_id)`.
 
     Raises:
         LookupError: If the user is not found.
@@ -131,15 +131,15 @@ def fetch_twitch_user(login: str) -> tuple[str, str, str]:
 
 
 def lookup_twitch(login: str) -> tuple[str, str]:
-    """Resolve a Twitch login name to ``(login, user_id)``.
+    """Resolve a Twitch login name to `(login, user_id)`.
 
-    Wraps :func:`fetch_twitch_user` with console output and error handling.
+    Wraps `fetch_twitch_user` with console output and error handling.
 
     Args:
         login: Twitch login name (case-insensitive).
 
     Returns:
-        tuple[str, str]: Tuple of ``(login, user_id)``.
+        Tuple of `(login, user_id)`.
     """
     try:
         login_str, display_str, uid_str = fetch_twitch_user(login=login)
@@ -157,14 +157,13 @@ def lookup_twitch(login: str) -> tuple[str, str]:
 def _extract_trailing(params: str) -> str:
     """Extract the trailing parameter from an IRC params string.
 
-    IRC trailing parameters follow a ``" :"`` delimiter (e.g. ``"#channel :message
-    text"``).
+    IRC trailing parameters follow a `" :"` delimiter (e.g. `"#channel :message text"`).
 
     Args:
         params: The raw params portion of an IRC line.
 
     Returns:
-        str: The text after ``" :"``, or an empty string if absent.
+        The text after `" :"`, or an empty string if absent.
     """
     colon_idx: int = params.find(" :")
     return params[colon_idx + 2 :] if colon_idx != -1 else ""
@@ -174,11 +173,11 @@ def _parse_tags(raw: str) -> dict[str, str]:
     """Parse an IRCv3 tag string into a mapping.
 
     Args:
-        raw: Semicolon-delimited ``key=value`` pairs (e.g.
-        ``"ban-duration=600;target-user-id=123"``).
+        raw: Semicolon-delimited `key=value` pairs (e.g.
+        `"ban-duration=600;target-user-id=123"`).
 
     Returns:
-        dict[str, str]: Mapping of tag names to their string values.
+        Mapping of tag names to their string values.
     """
     result: dict[str, str] = {}
     for pair in raw.split(sep=";"):
@@ -191,17 +190,16 @@ def _parse_tags(raw: str) -> dict[str, str]:
 
 
 def _parse_emote_positions(raw: str) -> tuple[tuple[int, int], ...]:
-    """Parse the ``emotes`` IRC tag into character-position ranges.
+    """Parse the `emotes` IRC tag into character-position ranges.
 
-    The tag format is ``emote_id:start-end,start-end/emote_id:start-end,...``.
+    The tag format is `emote_id:start-end,start-end/emote_id:start-end,...`.
     Each range is a pair of inclusive character indices into the message text.
 
     Args:
-        raw: Value of the ``emotes`` IRC tag (may be empty).
+        raw: Value of the `emotes` IRC tag (may be empty).
 
     Returns:
-        tuple[tuple[int, int], ...]: Tuple of ``(start, end)`` pairs sorted by start
-        position.
+        Tuple of `(start, end)` pairs sorted by start position.
     """
     if not raw:
         return ()
@@ -237,8 +235,8 @@ class TwitchChat:
         await twitch.run()  # blocks until cancelled
 
     Attributes:
-        connected: :class:`asyncio.Event` set once the IRC client has joined the channel
-        and is ready to receive messages.
+        connected: `asyncio.Event` set once the IRC client has joined the channel and is
+        ready to receive messages.
     """
 
     __slots__ = (
@@ -263,7 +261,7 @@ class TwitchChat:
         """Initialise the Twitch chat client.
 
         Args:
-            channel: Twitch channel login name (lowercase, no ``#``).
+            channel: Twitch channel login name (lowercase, no `#`).
             channel_id: Numeric Twitch user ID for emote cache lookups.
             on_message: Sync callback invoked for each chat message.
             on_clearchat: Sync callback invoked for each ban/timeout.
@@ -288,8 +286,8 @@ class TwitchChat:
             within: Maximum age in seconds.
 
         Returns:
-            bool: ``True`` if a ``CLEARCHAT`` targeting this user was received within
-            the given time window.
+            `True` if a `CLEARCHAT` targeting this user was received within the given
+            time window.
         """
         return check_recent_ban(bans=self._recent_bans, user_id=user_id, within=within)
 
@@ -321,7 +319,7 @@ class TwitchChat:
             msg: The chat message to clean.
 
         Returns:
-            str: Message text with all emote tokens removed.
+            Message text with all emote tokens removed.
         """
         return self._emote_cache.strip_emotes(text=msg.text_without_emotes())
 
@@ -418,12 +416,12 @@ class TwitchChat:
 
     # PRIVMSG
     def _handle_privmsg(self, *, tags_raw: str, prefix: str, params: str) -> None:
-        """Parse a ``PRIVMSG`` and invoke the message callback.
+        """Parse a `PRIVMSG` and invoke the message callback.
 
         Args:
             tags_raw: Raw IRCv3 tags string.
-            prefix: IRC prefix (``user!user@user.tmi.twitch.tv``).
-            params: Everything after the command (``#channel :text``).
+            prefix: IRC prefix (`user!user@user.tmi.twitch.tv`).
+            params: Everything after the command (`#channel :text`).
         """
         tags: dict[str, str] = _parse_tags(raw=tags_raw)
 
@@ -461,11 +459,11 @@ class TwitchChat:
 
     # CLEARCHAT
     def _handle_clearchat(self, *, tags_raw: str, params: str) -> None:
-        """Parse a ``CLEARCHAT`` and invoke the clearchat callback.
+        """Parse a `CLEARCHAT` and invoke the clearchat callback.
 
         Args:
             tags_raw: Raw IRCv3 tags string.
-            params: Everything after the command (``#channel [:username]``).
+            params: Everything after the command (`#channel [:username]`).
         """
         tags: dict[str, str] = _parse_tags(raw=tags_raw)
 

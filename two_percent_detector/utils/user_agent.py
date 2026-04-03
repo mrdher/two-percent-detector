@@ -53,7 +53,7 @@ def chrome_user_agent() -> str:
     Subsequent calls return the cached result.
 
     Returns:
-        str: A realistic Chrome User-Agent header value.
+        A realistic Chrome User-Agent header value.
     """
     version: str = _FALLBACK_VERSION
     try:

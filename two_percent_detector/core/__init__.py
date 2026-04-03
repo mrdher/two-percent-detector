@@ -1,6 +1,6 @@
 """Core business logic for the 2% Detector.
 
-Shared types (``ChatMessage``, ``ClearChatEvent``, ``PlatformClient``), the per-user
+Shared types (`ChatMessage`, `ClearChatEvent`, `PlatformClient`), the per-user
 rolling-window spam detector, and session statistics tracking.
 """
 

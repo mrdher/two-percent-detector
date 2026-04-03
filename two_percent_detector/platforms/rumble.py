@@ -4,14 +4,13 @@ Connects to a Rumble livestream chat via the internal Server-Sent Events (SSE) e
 No authentication is required for read-only access.
 
 The client:
+1. Opens an SSE connection to `https://web7.rumble.com/chat/api/chat/{stream_id}/stream`.
+2. Parses `init` and `messages` event types.
+3. Dispatches parsed chat messages via the `on_message` callback.
 
-1. Opens an SSE connection to ``https://web7.rumble.com/chat/api/chat/{stream_id}/stream``.
-2. Parses ``init`` and ``messages`` event types.
-3. Dispatches parsed chat messages via the ``on_message`` callback.
-
-The SSE reader runs in a background thread (via ``asyncio.to_thread``) because the
+The SSE reader runs in a background thread (via `asyncio.to_thread`) because the
 underlying HTTP transport is synchronous.
-Events are dispatched back to the event loop using ``loop.call_soon_threadsafe``.
+Events are dispatched back to the event loop using `loop.call_soon_threadsafe`.
 """
 
 from __future__ import annotations
@@ -54,7 +53,7 @@ _TITLE_MAX_LENGTH: Final[int] = 60
 # Rumble internal chat SSE endpoint.
 _SSE_URL: Final[str] = "https://web7.rumble.com/chat/api/chat/{stream_id}/stream"
 
-# Rumble channel page URL (the bare ``/{channel}`` path avoids Cloudflare).
+# Rumble channel page URL (the bare `/{channel}` path avoids Cloudflare).
 _CHANNEL_URL: Final[str] = "https://rumble.com/{channel}"
 
 # Rumble embed JS endpoint (public, no auth required).
@@ -66,14 +65,14 @@ _EMBED_URL: Final[str] = (
 _OEMBED_URL: Final[str] = "https://rumble.com/api/Media/oembed.json?url={video_url}"
 
 # Regex to find the first live video link in the channel page HTML.
-# Matches a ``<div … thumbnail__thumb--live">`` block followed by the first
-# ``<a … href="/v…-.html…">`` within the same thumbnail container.
+# Matches a `<div … thumbnail__thumb--live">` block followed by the first
+# `<a … href="/v…-.html…">` within the same thumbnail container.
 _LIVE_LINK_RE: Final[re.Pattern[str]] = re.compile(
     r'thumbnail__thumb--live".*?href="(/v[a-z0-9]+-[^"]+\.html)',
     re.DOTALL,
 )
 
-# Regex to extract the embed video ID from an oembed ``html`` field.
+# Regex to extract the embed video ID from an oembed `html` field.
 _EMBED_ID_RE: Final[re.Pattern[str]] = re.compile(r"/embed/(v[a-z0-9]+)")
 
 # Request timeout for the channel lookup (seconds).
@@ -91,7 +90,7 @@ def _find_live_video_path(
     """Fetch the channel page and return the live video path.
 
     Returns:
-        str: The video page path (e.g. ``/video-abc123.html``).
+        The video page path (e.g. `/video-abc123.html`).
 
     Raises:
         LookupError: If the channel is not found or not live.
@@ -127,7 +126,7 @@ def _resolve_embed_id(
     """Use the oembed API to resolve a video page path to an embed ID.
 
     Returns:
-        str: The embed video ID string.
+        The embed video ID string.
 
     Raises:
         TypeError: If the oembed response is malformed.
@@ -158,17 +157,17 @@ def fetch_rumble_stream_id(channel: str) -> tuple[str, str]:
 
     The lookup is a three-step process:
 
-    1. Fetch ``rumble.com/{channel}`` (the bare path bypasses Cloudflare).
-    2. Scrape the HTML for the first ``thumbnail__thumb--live`` element and extract the
+    1. Fetch `rumble.com/{channel}` (the bare path bypasses Cloudflare).
+    2. Scrape the HTML for the first `thumbnail__thumb--live` element and extract the
     video page link.
     3. Call the Rumble oembed API to resolve the embed video ID, then call the embed JS
     API with that ID to get the numeric stream ID and title.
 
     Args:
-        channel: Rumble channel name / slug (e.g. ``"Asmongold"``).
+        channel: Rumble channel name / slug (e.g. `"Asmongold"`).
 
     Returns:
-        tuple[str, str]: Tuple of ``(stream_id, title)``.
+        Tuple of `(stream_id, title)`.
 
     Raises:
         TypeError: If the API response is malformed.
@@ -212,16 +211,15 @@ def fetch_rumble_stream_id(channel: str) -> tuple[str, str]:
 
 
 def lookup_rumble(channel: str) -> tuple[str, str]:
-    """Resolve a Rumble channel name to ``(stream_id, title)``.
+    """Resolve a Rumble channel name to `(stream_id, title)`.
 
-    Wraps :func:`fetch_rumble_stream_id` with console output and
-    ``sys.exit(1)`` on failure.
+    Wraps `fetch_rumble_stream_id` with console output and `sys.exit(1)` on failure.
 
     Args:
         channel: Rumble channel name (case-insensitive).
 
     Returns:
-        tuple[str, str]: Tuple of ``(stream_id, title)``.
+        Tuple of `(stream_id, title)`.
     """
     try:
         stream_id, title = fetch_rumble_stream_id(channel=channel)
@@ -242,10 +240,10 @@ def lookup_rumble(channel: str) -> tuple[str, str]:
 
 
 def _cache_users(raw: JsonValue | None, cache: dict[str, JsonObj]) -> None:
-    """Update the user cache from a ``users`` array in an SSE event.
+    """Update the user cache from a `users` array in an SSE event.
 
     Args:
-        raw: Value of ``data["users"]`` from the SSE JSON.
+        raw: Value of `data["users"]` from the SSE JSON.
         cache: Mutable user cache keyed by user-ID string.
     """
     if not isinstance(raw, list):
@@ -268,10 +266,10 @@ def _dispatch_messages(
     """Parse and dispatch messages from an SSE event payload.
 
     Args:
-        raw: Value of ``data["messages"]`` from the SSE JSON.
-        parse: Converts a message JSON object to a ``ChatMessage``.
+        raw: Value of `data["messages"]` from the SSE JSON.
+        parse: Converts a message JSON object to a `ChatMessage`.
         on_message: Callback invoked on the event loop per message.
-        loop: Target event loop for ``call_soon_threadsafe``.
+        loop: Target event loop for `call_soon_threadsafe`.
     """
     if not isinstance(raw, list):
         return
@@ -284,13 +282,13 @@ def _dispatch_messages(
 
 
 def _parse_sse_data(block: str) -> str:
-    """Extract concatenated ``data:`` payload from an SSE block.
+    """Extract concatenated `data:` payload from an SSE block.
 
     Args:
-        block: Raw SSE event text (one or more ``data:`` lines).
+        block: Raw SSE event text (one or more `data:` lines).
 
     Returns:
-        str: Combined data string (empty if no ``data:`` lines found).
+        Combined data string (empty if no `data:` lines found).
     """
     parts: list[str] = []
     for line in block.splitlines():
@@ -315,8 +313,8 @@ class RumbleChat:
         await rumble.run()  # blocks until cancelled
 
     Attributes:
-        connected: :class:`asyncio.Event` set once the SSE connection is established and
-        the initial ``init`` event is processed.
+        connected: `asyncio.Event` set once the SSE connection is established and the
+        initial `init` event is processed.
     """
 
     __slots__ = (
@@ -359,19 +357,19 @@ class RumbleChat:
             within: Maximum age in seconds.
 
         Returns:
-            bool: ``True`` if a moderation event targeting this user was received within
-            the given time window.
+            `True` if a moderation event targeting this user was received within the
+            given time window.
         """
         return check_recent_ban(bans=self._recent_bans, user_id=user_id, within=within)
 
     def clean_text(self, msg: ChatMessage) -> str:
-        """Strip Rumble ``:name:`` emote tokens from a message.
+        """Strip Rumble `:name:` emote tokens from a message.
 
         Args:
             msg: The chat message to clean.
 
         Returns:
-            str: Message text with emote tokens removed.
+            Message text with emote tokens removed.
         """
         return strip_rumble_emotes(text=msg.text)
 
@@ -412,7 +410,7 @@ class RumbleChat:
         """Read SSE events from the Rumble chat endpoint.
 
         This method runs in a background thread.
-        Events are dispatched back to the event loop via ``call_soon_threadsafe``.
+        Events are dispatched back to the event loop via `call_soon_threadsafe`.
 
         Args:
             loop: The asyncio event loop to dispatch callbacks on.
@@ -441,7 +439,7 @@ class RumbleChat:
         """Parse a single SSE event block and dispatch it.
 
         Args:
-            block: Raw SSE event text (one or more ``data:`` lines).
+            block: Raw SSE event text (one or more `data:` lines).
             loop: Event loop for thread-safe callbacks.
         """
         data_str: str = _parse_sse_data(block=block)
@@ -532,14 +530,13 @@ class RumbleChat:
             loop.call_soon_threadsafe(self._on_clearchat, event)
 
     def _parse_message(self, msg_data: JsonObj) -> ChatMessage | None:
-        """Convert a Rumble message JSON block into a :class:`ChatMessage`.
+        """Convert a Rumble message JSON block into a `ChatMessage`.
 
         Args:
             msg_data: Single message block from the SSE payload.
 
         Returns:
-            ChatMessage | None: ``ChatMessage`` or ``None`` if required fields are
-            missing.
+            `ChatMessage` or `None` if required fields are missing.
         """
         text: JsonValue = msg_data.get("text")
         if not isinstance(text, str) or not text.strip():

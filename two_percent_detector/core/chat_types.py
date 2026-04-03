@@ -1,8 +1,7 @@
 """Shared types and protocols for cross-platform chat monitoring.
 
-Defines the common :class:`ChatMessage` and :class:`ClearChatEvent` data classes, and
-the :class:`PlatformClient` protocol implemented by all platform monitors (Twitch, Kick,
-Rumble).
+Defines the common `ChatMessage` and `ClearChatEvent` data classes, and the
+`PlatformClient` protocol implemented by all platform monitors (Twitch, Kick, Rumble).
 """
 
 from __future__ import annotations
@@ -51,15 +50,15 @@ RECONNECT_DELAY: Final[float] = 5.0
 
 
 def check_recent_ban(bans: dict[str, float], user_id: str, within: float) -> bool:
-    """Check whether *user_id* was banned within the last *within* seconds.
+    """Check whether `user_id` was banned within the last `within` seconds.
 
     Args:
-        bans: Mapping of user ID to ``time.monotonic()`` ban timestamp.
+        bans: Mapping of user ID to `time.monotonic()` ban timestamp.
         user_id: User ID to look up.
         within: Maximum age in seconds.
 
     Returns:
-        bool: ``True`` if the user has a ban entry newer than *within* seconds.
+        `True` if the user has a ban entry newer than `within` seconds.
     """
     ts: float | None = bans.get(user_id)
     return ts is not None and (time.monotonic() - ts) < within
@@ -75,10 +74,10 @@ class ChatMessage:
         username: Login name (lowercase where applicable).
         display_name: Human-readable display name.
         text: Raw message text.
-        is_mod: ``True`` if the sender has moderator privileges.
-        is_broadcaster: ``True`` if the sender is the channel owner.
-        is_subscriber: ``True`` if the sender is a subscriber.
-        is_vip: ``True`` if the sender has VIP status.
+        is_mod: `True` if the sender has moderator privileges.
+        is_broadcaster: `True` if the sender is the channel owner.
+        is_subscriber: `True` if the sender is a subscriber.
+        is_vip: `True` if the sender has VIP status.
         emote_ranges: Twitch-native emote character positions.
         Empty tuple for non-Twitch platforms.
     """
@@ -97,13 +96,13 @@ class ChatMessage:
     def text_without_emotes(self) -> str:
         """Return the message text with Twitch-native emote substrings removed.
 
-        Uses the character positions from the ``emotes`` IRC tag to mask emote words,
-        then collapses whitespace.
+        Uses the character positions from the `emotes` IRC tag to mask emote words, then
+        collapses whitespace.
         Returns the original text unchanged for non-Twitch platforms (empty
-        ``emote_ranges``).
+        `emote_ranges`).
 
         Returns:
-            str: Cleaned text with emotes removed and whitespace collapsed.
+            Cleaned text with emotes removed and whitespace collapsed.
         """
         if not self.emote_ranges:
             return self.text
@@ -121,10 +120,10 @@ class ClearChatEvent:
     Attributes:
         platform: Source platform identifier.
         username: Target user login name (empty for full chat clears).
-        user_id: Target user ID, or ``""`` if unavailable.
-        duration: Timeout duration in seconds (``0`` for permanent bans).
-        permanent: ``True`` for permanent bans, ``False`` for timeouts.
-        ts: ``time.monotonic()`` value when the event was received.
+        user_id: Target user ID, or `""` if unavailable.
+        duration: Timeout duration in seconds (`0` for permanent bans).
+        permanent: `True` for permanent bans, `False` for timeouts.
+        ts: `time.monotonic()` value when the event was received.
     """
 
     platform: Platform
@@ -139,8 +138,8 @@ class PlatformClient(Protocol):
     """Interface contract for platform-specific chat clients.
 
     All platform monitors (Twitch, Kick, Rumble) implement this protocol.
-    The :class:`~monitor.Monitor` orchestrator interacts with clients exclusively
-    through this interface.
+    The `monitor.Monitor` orchestrator interacts with clients exclusively through this
+    interface.
 
     Attributes:
         connected: Signalled once the client has joined the channel.
@@ -153,7 +152,7 @@ class PlatformClient(Protocol):
         ...
 
     def was_recently_banned(self, *, user_id: str, within: float) -> bool:
-        """Check whether *user_id* was moderated within *within* seconds."""
+        """Check whether `user_id` was moderated within `within` seconds."""
         ...
 
     def clean_text(self, msg: ChatMessage) -> str:

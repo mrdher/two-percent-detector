@@ -2,7 +2,7 @@
 
 Each module handles one platform's transport layer — connection lifecycle, message
 parsing, emote stripping, and ban detection — and exposes a class that satisfies the
-``PlatformClient`` protocol.
+`PlatformClient` protocol.
 All three clients connect anonymously in read-only mode; no OAuth token is required.
 """
 

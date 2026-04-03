@@ -107,7 +107,7 @@ def _format_stats_columns(stats: ChatStats) -> tuple[str, str, str]:
     """Build the aligned messages / bans / rates lines for the stats panel.
 
     Returns:
-        tuple[str, str, str]: Tuple of ``(messages_line, bans_line, rates_line)``.
+        Tuple of `(messages_line, bans_line, rates_line)`.
     """
     col1_m: str = f"{stats.total_messages:,} total"
     col2_m: str = f"{stats.unique_users:,} users"
