@@ -52,6 +52,23 @@ _DEDUP_CHAR_PATTERN: Final[re.Pattern[str]] = re.compile(r"(.)\1+")
 # Collapses repeated 1-3 character syllables (e.g. "hahahahaha" → "haha").
 _SYLLABLE_REPEAT_PATTERN: Final[re.Pattern[str]] = re.compile(r"(.{1,3})\1{2,}")
 
+# Character sets that form common filler/exclamation patterns (e.g. laughter).
+# If a normalised message (ignoring spaces) is composed entirely of one of these
+# character sets, it is treated as a common word regardless of exact spelling.
+_FILLER_CHARSETS: Final[tuple[frozenset[str], ...]] = (
+    frozenset[str]("ha"),  # haha, ahaha, hahhaah, ahahhaha, …
+    frozenset[str]("he"),  # hehe, heheheh, …
+    frozenset[str]("ja"),  # jajaja (Spanish laughter)
+    frozenset[str]("ke"),  # kekeke
+    frozenset[str]("rs"),  # rsrsrs (Brazilian laughter)
+    frozenset[str]("lo"),  # looool, ololol
+    frozenset[str]("xd"),  # xdddd, xdxdxd
+)
+
+# Minimum length for charset filler detection to avoid matching very short strings
+# that might be legitimate short replies.
+_FILLER_CHARSET_MIN_LEN: Final[int] = 3
+
 # Common filler words that should not trigger spam alerts on their own.
 _COMMON_WORDS: Final[frozenset[str]] = frozenset[str](
     json.loads(
@@ -100,15 +117,36 @@ def _normalize(text: str) -> str:
     return _WHITESPACE_PATTERN.sub(" ", text).strip()
 
 
+def _is_filler_charset(text: str) -> bool:
+    """Return `True` if `text` is composed entirely of a known filler character set.
+
+    This catches irregular laughter variants like `"hahahhahahhah"`,
+    `"ahahhaahahha"`, `"hhaah"`, etc. that syllable-based dedup cannot handle
+    because the repeated units are not uniform.
+
+    Args:
+        text: Already-normalised (lowercased, stripped) message text.
+
+    Returns:
+        `True` if every character belongs to a single known filler charset.
+    """
+    chars: frozenset[str] = frozenset[str](text.replace(" ", ""))
+    if len(chars) < 1 or len(text) < _FILLER_CHARSET_MIN_LEN:
+        return False
+    return any(chars <= cs for cs in _FILLER_CHARSETS)
+
+
 def _is_common_word(normalized: str) -> bool:
     """Check whether `normalized` is a variant of a common filler word.
 
-    Besides an exact lookup the function also tries two relaxations:
+    Besides an exact lookup the function also tries three relaxations:
 
     1. Character dedup — collapse every run of identical characters to one
-    (`loll` → `lol`, `niceee` → `nice`).
+    (`"loll"` → `"lol"`, `"niceee"` → `"nice"`).
     2. Syllable dedup — collapse repeated 1-3 character syllables to two repetitions
-    (`hahahahaha` → `haha`).
+    (`"hahahahaha"` → `"haha"`).
+    3. Charset filler — check if the message is composed entirely of a known filler
+    character set (e.g. only '"h"' and '"a"' for laughter variants).
 
     Single-character results (e.g. `"2"` from `"2222222222"`) are always treated as
     filler.
@@ -127,7 +165,10 @@ def _is_common_word(normalized: str) -> bool:
         return True
 
     syllable: str = _SYLLABLE_REPEAT_PATTERN.sub(r"\1\1", normalized)
-    return syllable in _COMMON_WORDS
+    if syllable in _COMMON_WORDS:
+        return True
+
+    return _is_filler_charset(text=normalized)
 
 
 # Fuzzy similarity
