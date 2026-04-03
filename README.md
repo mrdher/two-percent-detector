@@ -173,7 +173,7 @@ uv run monitor --twitch
 
 ## Adjusting sensitivity
 
-If you're getting too many alerts or missing spam, open `two_percent_detector/detector.py` in a text editor and change these values near the top:
+If you're getting too many alerts or missing spam, open `two_percent_detector/core/detector.py` in a text editor and change these values near the top:
 
 | Setting                | Default | Meaning                                                    |
 | ---------------------- | ------- | ---------------------------------------------------------- |
@@ -194,7 +194,7 @@ You can forward every alert to a Discord channel so you (and your mods) see them
 
 ### 2. Paste the URL
 
-Open `two_percent_detector/discord.py` and replace the empty string on the `WEBHOOK_URL` line:
+Open `two_percent_detector/integrations/discord.py` and replace the empty string on the `WEBHOOK_URL` line:
 
 ```python
 WEBHOOK_URL: Final[str] = "https://discord.com/api/webhooks/..."
@@ -214,21 +214,29 @@ Alerts will now appear both in the terminal and in your Discord channel as embed
 
 All source code lives inside the `two_percent_detector/` package.
 
-| File                                     | Purpose                                                   |
-| ---------------------------------------- | --------------------------------------------------------- |
-| `two_percent_detector/monitor.py`        | Main entry point — run with `uv run monitor`              |
-| `two_percent_detector/__main__.py`       | Enables `python -m two_percent_detector`                  |
-| `two_percent_detector/twitch_monitor.py` | Twitch IRC WebSocket client + channel ID lookup           |
-| `two_percent_detector/kick_monitor.py`   | Kick Pusher WebSocket client + channel ID lookup          |
-| `two_percent_detector/rumble_monitor.py` | Rumble SSE client + channel ID lookup                     |
-| `two_percent_detector/chat_types.py`     | Shared types: `Platform`, `ChatMessage`, `ClearChatEvent` |
-| `two_percent_detector/detector.py`       | Spam detection logic (rolling window + similarity)        |
-| `two_percent_detector/emotes.py`         | Downloads and caches emote lists (7TV, FFZ, BTTV)         |
-| `two_percent_detector/stats.py`          | Session statistics tracking and sparkline rendering       |
-| `two_percent_detector/ui.py`             | Rich terminal rendering (alerts, stats panels, banners)   |
-| `two_percent_detector/discord.py`        | Optional Discord webhook integration                      |
-| `two_percent_detector/config.py`         | Channel defaults and known-bot whitelist                  |
-| `two_percent_detector/user_agent.py`     | Chrome User-Agent fetcher for HTTP requests               |
+| File / Folder             | Purpose                                                                     |
+| ------------------------- | --------------------------------------------------------------------------- |
+| `monitor.py`              | Main entry point — run with `uv run monitor`                                |
+| `__main__.py`             | Enables `python -m two_percent_detector`                                    |
+| `config.py`               | Channel defaults and known-bot whitelist                                    |
+| **core/**                 |                                                                             |
+| `core/chat_types.py`      | Shared types: `Platform`, `ChatMessage`, `ClearChatEvent`, `PlatformClient` |
+| `core/detector.py`        | Spam detection logic (rolling window + similarity)                          |
+| `core/stats.py`           | Session statistics tracking and sparkline rendering                         |
+| **data/**                 |                                                                             |
+| `data/common_words.json`  | Filler words ignored during spam detection                                  |
+| `data/known_bots.json`    | Bot usernames that are always ignored                                       |
+| **integrations/**         |                                                                             |
+| `integrations/discord.py` | Optional Discord webhook integration                                        |
+| **platforms/**            |                                                                             |
+| `platforms/twitch.py`     | Twitch IRC WebSocket client + channel ID lookup                             |
+| `platforms/kick.py`       | Kick Pusher WebSocket client + channel ID lookup                            |
+| `platforms/rumble.py`     | Rumble SSE client + channel ID lookup                                       |
+| **ui/**                   |                                                                             |
+| `ui/terminal.py`          | Rich terminal rendering (alerts, stats panels, banners)                     |
+| **utils/**                |                                                                             |
+| `utils/emotes.py`         | Downloads and caches emote lists (7TV, FFZ, BTTV)                           |
+| `utils/user_agent.py`     | Chrome User-Agent fetcher for HTTP requests                                 |
 
 ---
 
