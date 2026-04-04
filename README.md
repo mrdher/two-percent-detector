@@ -130,16 +130,27 @@ You'll see a green panel confirming the monitor is online and watching chat.
 
 ## Keyboard shortcuts
 
-While the monitor is running, type a letter and press **Enter**:
+While the monitor is running, type a command and press **Enter**:
 
-| Key | Action                                                         |
-| --- | -------------------------------------------------------------- |
-| `s` | Show **global** session statistics (all platforms combined)    |
-| `t` | Show **Twitch** statistics (only if Twitch is being monitored) |
-| `k` | Show **Kick** statistics (only if Kick is being monitored)     |
-| `r` | Show **Rumble** statistics (only if Rumble is being monitored) |
+| Command             | Action                                                         |
+| ------------------- | -------------------------------------------------------------- |
+| `ss`                | Show **all** stats (global + each running platform)            |
+| `s`                 | Show **global** session statistics (all platforms combined)    |
+| `t`                 | Show **Twitch** statistics (only if Twitch is being monitored) |
+| `k`                 | Show **Kick** statistics (only if Kick is being monitored)     |
+| `r`                 | Show **Rumble** statistics (only if Rumble is being monitored) |
+| `start t [channel]` | Start Twitch (optionally with a different channel name)        |
+| `start k [channel]` | Start Kick (optionally with a different channel name)          |
+| `start r [channel]` | Start Rumble (optionally with a different channel name)        |
+| `stop t`            | Stop Twitch                                                    |
+| `stop k`            | Stop Kick                                                      |
+| `stop r`            | Stop Rumble                                                    |
+| `status`            | Show which platforms are currently running                     |
+| `h`                 | Show help                                                      |
+| `Ctrl+C`            | Quit                                                           |
 
 Platform shortcuts only work when the corresponding platform is active.
+Start/stop commands also accept full names (e.g. `start twitch zackrawrr`).
 
 ---
 
@@ -157,7 +168,9 @@ Platform shortcuts only work when the corresponding platform is active.
 
 ## Stopping the monitor
 
-Press **Ctrl + C** in the terminal window.
+Press **Ctrl + C** in the terminal window to quit entirely.
+
+To stop a single platform without exiting, type `stop t`, `stop k`, or `stop r` and press **Enter**.
 
 ---
 

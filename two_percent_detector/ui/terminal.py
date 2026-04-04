@@ -188,7 +188,7 @@ def print_stats(
             title=title,
             border_style=border,
             expand=False,
-        )
+        ),
     )
 
 
@@ -218,7 +218,7 @@ def print_ready(
         else "N/A (no Twitch channel)"
     )
 
-    shortcuts: list[str] = ["[bold]s[/bold] All"]
+    shortcuts: list[str] = ["[bold]ss[/bold] All", "[bold]s[/bold] Global"]
     if "twitch" in active:
         shortcuts.append("[bold]t[/bold] Twitch")
     if "kick" in active:
@@ -239,12 +239,15 @@ def print_ready(
                 f"Emotes:     {emote_info}\n"
                 f"Ignored:    Broadcaster, mods and {bot_count} known bots\n"
                 f"[dim]Listening for messages... Ctrl+C to stop.\n"
-                f"Stats: {shortcuts_line}[/dim]"
+                f"Stats:   {shortcuts_line}\n"
+                f"Control: [bold]start t[/bold]/[bold]k[/bold]/[bold]r[/bold]  "
+                f"[bold]stop t[/bold]/[bold]k[/bold]/[bold]r[/bold]  "
+                f"[bold]status[/bold]  [bold]h[/bold] help[/dim]"
             ),
             title="[bold]2% Detector[/bold]",
             border_style="green",
             expand=False,
-        )
+        ),
     )
 
 
@@ -263,7 +266,7 @@ def print_clearchat(event: ClearChatEvent) -> None:
         kind = "banned" if event.permanent else f"timed-out ({event.duration}s)"
     plat: str = PLATFORM_LABEL.get(event.platform, event.platform)
     console.print(
-        f"[dim]  \u26a1 [{plat}] {event.username} ({event.user_id}) {kind}[/dim]"
+        f"[dim]  \u26a1 [{plat}] {event.username} ({event.user_id}) {kind}[/dim]",
     )
 
 
@@ -276,5 +279,5 @@ def print_cleanup(*, removed: int, tracked: int) -> None:
     """
     console.print(
         f"[dim]  Cleanup: {removed} inactive user(s) removed. Tracking {tracked} now."
-        "[/dim]"
+        "[/dim]",
     )
