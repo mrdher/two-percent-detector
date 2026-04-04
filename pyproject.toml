@@ -42,10 +42,6 @@ ignore = [
     # Copyright headers are not used; the project is MIT-licensed.
     "CPY001", # missing-copyright-notice
 
-    # Deferred imports inside functions are intentional to avoid circular
-    # imports or defer expensive module loading at startup.
-    "PLC0415", # import-outside-top-level
-
     # KickChat.clean_text and RumbleChat.clean_text must be instance methods
     # to satisfy the PlatformClient Protocol, even though they don't use self.
     "PLR6301", # no-self-use
