@@ -371,7 +371,7 @@ class KickChat:
                     obj={
                         "event": "pusher:subscribe",
                         "data": {"channel": channel, "auth": ""},
-                    }
+                    },
                 )
                 await ext.send_payload(buf=subscribe_msg)
                 logger.info("Kick: subscribed to %s", channel)
@@ -426,7 +426,7 @@ class KickChat:
             if self._ext is not None:
                 asyncio.get_running_loop().create_task(
                     coro=self._ext.send_payload(
-                        buf=json.dumps(obj={"event": "pusher:pong", "data": "{}"})
+                        buf=json.dumps(obj={"event": "pusher:pong", "data": "{}"}),
                     ),
                     name="KickChat:pong",
                 )

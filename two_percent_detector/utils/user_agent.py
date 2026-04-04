@@ -69,7 +69,8 @@ def chrome_user_agent() -> str:
                         version = ver
     except OSError, json.JSONDecodeError:
         logger.warning(
-            "Could not fetch Chrome version; using fallback %s", _FALLBACK_VERSION
+            "Could not fetch Chrome version; using fallback %s",
+            _FALLBACK_VERSION,
         )
 
     return _UA_TEMPLATE.format(version=version)

@@ -29,6 +29,6 @@ KNOWN_BOTS: Final[frozenset[str]] = frozenset[str](
     json.loads(
         s=(Path(__file__).parent / "data" / "known_bots.json").read_text(
             encoding="utf-8",
-        )
+        ),
     ),
 )

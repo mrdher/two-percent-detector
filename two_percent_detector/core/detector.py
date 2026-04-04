@@ -74,7 +74,7 @@ _COMMON_WORDS: Final[frozenset[str]] = frozenset[str](
     json.loads(
         s=(Path(__file__).parents[1] / "data" / "common_words.json").read_text(
             encoding="utf-8",
-        )
+        ),
     ),
 )
 
@@ -240,7 +240,8 @@ class MessageDetector:
     def __init__(self) -> None:
         """Initialise an empty detector."""
         self._history: dict[str, deque[_MessageRecord]] = defaultdict[
-            str, deque[_MessageRecord]
+            str,
+            deque[_MessageRecord],
         ](lambda: deque[_MessageRecord](maxlen=MAX_HISTORY_PER_USER))
 
     def process(self, *, user_id: str, text: str) -> int:

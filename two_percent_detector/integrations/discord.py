@@ -130,7 +130,7 @@ async def send_alert(ctx: AlertContext) -> None:
                 name="Logs",
                 value=f"[supa.sh]({ctx.logs_url})",
                 inline=True,
-            )
+            ),
         )
 
     colour: int = _PLATFORM_EMBED_COLOUR.get(
